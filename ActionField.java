@@ -1,0 +1,239 @@
+package lesson6.gametank;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.Random;
+
+public class ActionField extends JPanel{
+
+    private BattleField bf;
+    private AbstractTank defender;
+    private AbstractTank agressor;
+    private Bullet bullet;
+    private int[][] randomArr = {{64, 64}, {64, 448}, {448, 64}};
+    private int randomPosition = -1;
+
+    public ActionField() throws Exception {
+
+        bf = new BattleField();
+        defender = new T34(this, bf);
+        int[] xy = randomArr[getRandomNum()];
+        int y2 = xy[1];
+        int x2 = xy[0];
+        agressor = new Tiger(this, bf, x2, y2, Direction.DOWN);
+        bullet = new Bullet(-100, -100, Direction.UP);
+        initFrame();
+    }
+
+    public void runTheGame() throws Exception {
+
+        defender.moveToQuadrant(64, 64);
+
+        defender.clean();
+//        defender.moveRandom();
+//        defender.destroy();
+//        defender.fire();
+//        defender.turn(4);
+//        defender.fire();
+//        defender.move();
+//        defender.move();
+//        defender.turn(1);
+//        defender.turn(2);
+//        defender.fire();
+//        defender.move();
+//        defender.fire();
+    }
+
+    private boolean processInterception() throws InterruptedException {
+
+        if (isOnTheField()) {
+
+            if (removeBrick(false)) {
+                bullet.destroy();
+            }
+
+            else if (removeTank()) {
+                agressor.destroy();
+                bullet.destroy();
+                repaint();
+                Thread.sleep(3000);
+                int[] xy = randomArr[getRandomNum()];
+                agressor.updateX(xy[0]);
+                agressor.updateY(xy[1]);
+                repaint();
+                ((Tiger)agressor).setArmor(1);
+            }
+            return false;
+        }
+        return true;
+    }
+
+    public boolean isOnTheField() {
+
+        if ((bullet.getX() > 0 &&  bullet.getX() < 575)
+                && (bullet.getY() > 0 &&  bullet.getY() < 575)) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean removeBrick(boolean removeType) {
+
+        String quadrant;
+
+        if (removeType) {
+            quadrant = getQuadrant(defender.getX(), defender.getY());
+        }
+        else quadrant = getQuadrant(bullet.getX(), bullet.getY());
+
+        int i = Integer.parseInt(quadrant.substring(0, quadrant.indexOf("_")));
+        int j = Integer.parseInt(quadrant.substring(quadrant.indexOf("_") + 1, quadrant.length()));
+
+        if (bf.scanQuadrant(i, j) instanceof Brick) {
+            bf.updateQuadrant(i, j, null);
+            repaint();
+            return true;
+        }
+        return false;
+    }
+
+    public boolean removeTank() throws InterruptedException {
+
+        String quadrant = getQuadrant(bullet.getX(), bullet.getY());
+        String quadrant2 = getQuadrant(agressor.getX(), agressor.getY());
+
+        if (quadrant.equalsIgnoreCase(quadrant2)) {
+            if (((Tiger) agressor).getArmor() == 1) {
+                ((Tiger) agressor).setArmor(((Tiger) agressor).getArmor() - 1);
+                bullet.destroy();
+                repaint();
+                defender.fire();
+                return false;
+            }
+            else return true;
+        }
+        return false;
+    }
+
+    String getQuadrant(int v, int h) {
+
+        int x = v / 64;
+        int	y = h / 64;
+
+        return y + "_" + x;
+    }
+
+    public void initFrame() throws Exception {
+        JFrame frame = new JFrame("BATTLE FIELD, DAY 2");
+        frame.setLocation(750, 150);
+        frame.setMinimumSize(new Dimension(bf.getBF_WIDTH(), bf.getBF_HEIGHT() + 22));
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        frame.getContentPane().add(this);
+        frame.pack();
+        frame.setVisible(true);
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+
+        super.paintComponent(g);
+
+        bf.draw(g);
+        defender.draw(g);
+        agressor.draw(g);
+        bullet.draw(g);
+    }
+
+    public void processMove(AbstractTank tank) throws InterruptedException {
+
+        for (int i = 0; i < 64; i++) {
+
+            if (tank.getDirection().getId() == 1) {
+
+                if (tank.getY() !=0) {
+                    tank.updateY(-1);
+                }
+                else System.out.println("Wrong direction");
+            }
+            else if (tank.getDirection().getId() == 2) {
+
+                if (tank.getY() != 512) {
+                    tank.updateY(1);
+                }
+                else System.out.println("Wrong direction");
+            }
+            else if (tank.getDirection().getId() == 3) {
+
+                if (tank.getX() != 0) {
+                    tank.updateX(- 1);
+                }
+                else System.out.println("Wrong direction");
+            }
+            else if (tank.getDirection().getId() == 4) {
+
+                if (tank.getX() != 512) {
+                    tank.updateX(1);
+                }
+                else System.out.println("Wrong direction");
+            }
+            repaint();
+            Thread.sleep(tank.getSpeed()/2);
+
+        }
+        this.removeBrick(true);
+    }
+
+    public void processTurn(AbstractTank tank) {
+
+        repaint();
+    }
+
+    public void processFire(Bullet bullet) throws InterruptedException {
+
+        this.bullet = bullet;
+        while (isOnTheField()) {
+            for (int i = 0; i < 64; ) {
+
+                if (defender.getDirection().getId() == 1) {
+                    bullet.updateY(-1);
+                    System.out.println(bullet.getY());
+                }
+                else if (defender.getDirection().getId() == 2) {
+                    bullet.updateY(1);
+                    System.out.println(bullet.getY());
+                }
+                else if (defender.getDirection().getId() == 3) {
+                    bullet.updateX(-1);
+                    System.out.println(bullet.getX());
+                }
+                else if (defender.getDirection().getId() == 4) {
+                    bullet.updateX(1);
+                    System.out.println(bullet.getX());
+                }
+                processInterception();
+                repaint();
+                Thread.sleep(bullet.getSpeed());
+                break;
+            }
+        }
+    }
+
+    public int getRandomNum() {
+
+        Random random = new Random();
+        int randomInt = random.nextInt(3);
+        if (randomPosition == randomInt) {
+            return getRandomNum();
+        }
+        randomPosition = randomInt;
+        return randomInt;
+    }
+
+    public AbstractTank getTank() {
+        return defender;
+    }
+
+    public AbstractTank getAgressor() {
+        return agressor;
+    }
+}
