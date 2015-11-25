@@ -8,7 +8,7 @@ public class FieldObject implements Drawable, Destroyable{
     protected int x;
     protected int y;
 
-    public FieldObject(int x, int y) {
+    public FieldObject(int y, int x) {
         this.x = x;
         this.y = y;
     }
