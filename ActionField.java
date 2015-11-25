@@ -6,6 +6,8 @@ import java.util.Random;
 
 public class ActionField extends JPanel{
 
+    private boolean COLORDED_MODE = false;
+
     private BattleField bf;
     private AbstractTank defender;
     private AbstractTank agressor;
@@ -137,6 +139,25 @@ public class ActionField extends JPanel{
     protected void paintComponent(Graphics g) {
 
         super.paintComponent(g);
+
+        int i = 0;
+        Color cc;
+        for (int v = 0; v < 9; v++) {
+            for (int h = 0; h < 9; h++) {
+                if (COLORDED_MODE) {
+                    if (i % 2 == 0) {
+                        cc = new Color(252, 241, 177);
+                    } else {
+                        cc = new Color(233, 243, 255);
+                    }
+                } else {
+                    cc = new Color(180, 180, 180);
+                }
+                i++;
+                g.setColor(cc);
+                g.fillRect(h * 64, v * 64, 64, 64);
+            }
+        }
 
         bf.draw(g);
         defender.draw(g);

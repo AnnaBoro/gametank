@@ -5,6 +5,7 @@ import java.awt.*;
 
 public abstract class AbstractTank implements Drawable, Destroyable{
 
+
     private Direction direction;
 
     private int x = 128;
