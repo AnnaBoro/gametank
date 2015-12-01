@@ -7,25 +7,31 @@ public class BattleField{
     private int BF_WIDTH = 576;
     private int BF_HEIGHT = 576;
 
-    private FieldObject[][] battleField = {
-            {new Brick(0, 0), new Water(0, 1), new Water(0, 2), new Brick(0, 3), new Water(0, 4), new Brick(0, 5),
-                    new Brick(0, 6), new Brick(0, 7), new Brick(0, 8)},
-            {new Eagle(1, 0), null, null, null, null, null, null, null, new Brick(0, 8)},
-            {new Brick(2, 0), new Brick(2, 1), null, null, new Rock(2, 4), null, null, new Brick(2, 7), new Brick(2, 8)},
-            {new Brick(3, 0), null, new Brick(3, 2), null, null, null, new Brick(3, 6), null, new Brick(3, 8)},
-            {new Brick(4, 0), null, new Water(4, 2), null, null, null, null, null, new Brick(4, 8)},
-            {null, null, null, new Brick(5, 3), null, new Water(5, 5), null, new Brick(5, 7), new Brick(5, 8)},
-            {null, new Brick(6, 1), null, null, null, null, null, new Brick(6, 7), new Brick(6, 8)},
-            {null, null, null, null, null, new Brick(7, 5), null, null, new Brick(7, 8)},
-            {new Brick(8, 0), null, null, new Brick(8, 3), null, null, null, null, new Water(8, 8)}};
+    private String[][] battleField = {
+            {"B", " ", "R", "B", "B", "B", "B", "B", "B"},
+            {"B", " ", " ", " ", " ", " ", " ", " ", "B"},
+            {"B", "B", " ", " ", "B", " ", " ", "R", "B"},
+            {"B", " ", "E", " ", " ", " ", "R", " ", "B"},
+            {"B", " ", "B", " ", " ", " ", " ", " ", "B"},
+            {" ", " ", " ", "B", " ", "B", " ", "B", "B"},
+            {" ", "B", " ", " ", " ", " ", " ", "B", "B"},
+            {" ", " ", " ", "W", "W", "W", " ", " ", "B"},
+            {"B", " ", " ", "B", " ", " ", " ", " ", "B"}};
+
+    private FieldObject[][] objBattleField = new FieldObject[9][9];
 
 
     public BattleField() {
 
+        initObjectBattleField();
+    }
+
+    public void setBattleField(String[][] battleField) {
+        this.battleField = battleField;
     }
 
     public FieldObject[][] getBattleField() {
-        return battleField;
+        return objBattleField;
     }
 
     public int getBF_WIDTH() {
@@ -38,15 +44,20 @@ public class BattleField{
 
     public FieldObject scanQuadrant(int v, int h) {
 
-        return battleField[v][h];
+        return objBattleField[v][h];
     }
 
     public void updateQuadrant(int v, int h, FieldObject f) {
 
-        battleField[v][h] = f;
+        objBattleField[v][h] = f;
     }
 
     public  int getDimensionY() {
+
+        return battleField.length;
+    }
+
+    public  int getDimensionX() {
 
         return battleField[0].length;
     }
@@ -54,7 +65,7 @@ public class BattleField{
     public void draw (Graphics g) {
 
         for (int j = 0; j < this.getDimensionY(); j++) {
-            for (int k = 0; k < this.getDimensionY(); k++) {
+            for (int k = 0; k < this.getDimensionX(); k++) {
                 String coordinates = getQuadrantXY(j + 1, k + 1);
                 int separator = coordinates.indexOf("_");
                 int y = Integer.parseInt(coordinates.substring(0, separator));
@@ -62,7 +73,7 @@ public class BattleField{
 
                 if (this.scanQuadrant(j, k) != null) {
 
-                        battleField[j][k].draw(g);
+                    objBattleField[j][k].draw(g);
                 }
             }
         }
@@ -71,5 +82,31 @@ public class BattleField{
     public String getQuadrantXY(int v, int h) {
 
         return (v - 1) * 64 + "_" + (h - 1) * 64;
+    }
+
+    public void initObjectBattleField() {
+
+        for (int i = 0; i < battleField.length; i ++) {
+            for (int j = 0; j < battleField[i].length; j ++) {
+
+                if (battleField[i][j].equalsIgnoreCase("B")) {
+                    objBattleField[i][j] = new Brick(i * 64, j * 64);
+                }
+
+                else if (battleField[i][j].equalsIgnoreCase("R")) {
+                    objBattleField[i][j] = new Rock(i * 64, j * 64);
+                }
+
+                else if (battleField[i][j].equalsIgnoreCase("W")) {
+                    objBattleField[i][j] = new Water(i * 64, j * 64);
+                }
+                else if (battleField[i][j].equalsIgnoreCase("E")) {
+                    objBattleField[i][j] = new Eagle(i * 64, j * 64);
+                }
+                else if (battleField[i][j].equalsIgnoreCase(" ")) {
+                    objBattleField[i][j] = new ClearField(i * 64, j * 64);
+                }
+            }
+        }
     }
 }

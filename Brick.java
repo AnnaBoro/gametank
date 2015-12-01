@@ -13,7 +13,7 @@ public class Brick  extends FieldObject{
     public void draw(Graphics g) {
 
         g.setColor(new Color(0, 0, 255));
-        g.fillRect(x * 64, y * 64, 64, 64);
+        g.fillRect(x, y, 64, 64);
     }
 
 }
